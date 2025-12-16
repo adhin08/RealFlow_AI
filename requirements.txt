@@ -1,0 +1,17 @@
+chromadb
+pandas
+tqdm
+openai
+requests
+fastapi
+uvicorn
+python-multipart
+pydantic
+python-dotenv
+
+
+
+
+
+
+

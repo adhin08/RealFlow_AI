@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: realflow-ai
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    # Render provides PORT; bind to it instead of a hardcoded value.
+    startCommand: "uvicorn src.api:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false   # set in Render dashboard
+      - key: N8N_URL
+        sync: false   # set in Render dashboard
+      - key: N8N_API_KEY
+        sync: false   # set in Render dashboard
+      - key: RAG_VERSION
+        value: v3
+    healthCheckPath: /health
+    # Uncomment below to persist chroma_db on Render (requires paid plan):
+    # disk:
+    #   name: chroma
+    #   mountPath: /opt/render/project/src/chroma_db
+    #   sizeGB: 1
+

@@ -1,0 +1,50 @@
+{
+  "name": "Telegram Hello Bot",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        250,
+        300
+      ],
+      "parameters": {
+        "updates": [
+          "message"
+        ]
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "2",
+      "name": "Reply",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "operation": "sendMessage",
+        "text": "hello",
+        "chatId": "={{$json.message.chat.id}}"
+      },
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "active": false
+}

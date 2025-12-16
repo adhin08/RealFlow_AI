@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RealFlow AI — Generate n8n Workflows</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --grad-top:#49A8FF;
+      --grad-bottom:#BEE3FF;
+      --accent:#007BFF;
+      --accent-2:#005fcc;
+      --card-bg:#ffffff;
+      --card-border:#d6e4ff;
+      --text-dark:#02182B;
+      --placeholder:#6b7a90;
+      --muted:#4a5972;
+      --good:#1e9e63;
+      --warn:#c27b16;
+      --bad:#c62828;
+      --max-width:1100px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:Inter,system-ui,Arial,sans-serif}
+    body{
+      min-height:100vh;
+      background: linear-gradient(180deg, var(--grad-top) 0%, #6bb8ff 45%, var(--grad-bottom) 100%);
+      background-attachment: fixed;
+      -webkit-font-smoothing: antialiased;
+      color:var(--text-dark);
+      display:flex;flex-direction:column;
+    }
+    .nav{width:100%;padding:22px 40px;display:flex;justify-content:center}
+    .nav-inner{width:100%;max-width:var(--max-width);display:flex;justify-content:space-between;align-items:center}
+    .brand span{font-weight:700;letter-spacing:0.2px;color:#fff;font-size:18px}
+    .nav-links{display:flex;gap:20px;align-items:center}
+    .nav-links a{font-size:15px;color:#f0f7ff;text-decoration:none;opacity:0.9;font-weight:500}
+    .hero{width:100%;display:flex;justify-content:center;padding:48px 20px 52px}
+    .hero-inner{width:100%;max-width:960px;text-align:center;margin-top:4px}
+    h1{
+      font-family:'Playfair Display',serif;
+      font-size:52px;
+      font-weight:700;
+      color:#ffffff;
+      text-shadow:0 3px 10px rgba(0,0,0,0.25);
+      margin-bottom:14px;
+      letter-spacing:-0.5px;
+    }
+    p.lead{
+      font-size:19px;
+      max-width:720px;
+      margin:0 auto;
+      color:#f7fbff;
+      opacity:1;
+      text-shadow:0 2px 6px rgba(0,0,0,0.20);
+    }
+    .glass-wrap{display:flex;flex-direction:column;align-items:center;margin-top:36px;gap:14px}
+    .glass{
+      width:70%;
+      max-width:720px;
+      min-height:80px;
+      display:flex;align-items:center;gap:12px;
+      padding:12px 18px;
+      background:#ffffff;
+      border-radius:18px;
+      border:1px solid var(--card-border);
+      box-shadow:0 10px 24px rgba(3,25,64,0.08);
+    }
+    .input{
+      flex:1;border:0;background:transparent;font-size:17px;outline:none;
+      color:var(--text-dark);font-weight:600;
+    }
+    .input::placeholder{color:var(--placeholder);font-weight:500}
+    .btn{
+      background:var(--accent);
+      color:#fff;
+      padding:11px 20px;
+      border-radius:32px;
+      border:0;
+      font-weight:700;
+      cursor:pointer;
+      font-size:15px;
+      box-shadow:0 6px 18px rgba(0,123,255,0.22);
+      transition:0.16s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:0 18px 44px rgba(0,123,255,0.32);}
+    .btn:disabled{opacity:0.55;cursor:not-allowed;transform:none;box-shadow:none}
+    .small-toggle{display:flex;align-items:center;gap:8px;color:#f7fbff;font-size:14px;}
+    .status{margin-top:12px;color:#f7fbff;font-weight:600;min-height:24px;}
+    .card-area{width:100%;display:flex;justify-content:center;padding:0 20px 72px;}
+    .card{
+      width:min(96%, var(--max-width));
+      background:var(--card-bg);
+      border:1px solid var(--card-border);
+      border-radius:16px;
+      padding:22px;
+      box-shadow:0 12px 28px rgba(3,25,64,0.10);
+      display:grid;
+      grid-template-columns:1.1fr 0.9fr;
+      gap:18px;
+      word-break:break-word;
+    }
+    .section-title{font-weight:700;font-size:15px;margin-bottom:8px;color:#1b2a44;}
+    .pill{display:inline-block;padding:6px 12px;border-radius:12px;font-weight:700;font-size:13px;}
+    .pill.success{background:rgba(30,158,99,0.14);color:var(--good);}
+    .pill.warn{background:rgba(194,123,22,0.14);color:var(--warn);}
+    .pill.error{background:rgba(198,40,40,0.14);color:var(--bad);}
+    .pill.info{background:rgba(0,123,255,0.12);color:var(--accent-2);}
+    .muted{color:var(--muted);font-size:14px;line-height:1.5;}
+    pre{
+      background:#0f1b31;
+      color:#e9f0ff;
+      padding:12px;
+      border-radius:12px;
+      overflow:auto;
+      max-height:360px;
+      width:100%;
+      max-width:100%;
+      border:1px solid #1f3357;
+      font-size:13px;
+      line-height:1.5;
+      text-align:left;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+    ul{list-style:none;padding:0;margin:0;}
+    .ref-item{padding:8px 0;border-bottom:1px solid #e9eef8;}
+    .ref-item:last-child{border-bottom:0;}
+    .ref-title{font-weight:700;font-size:14px;color:#0f2038;}
+    .ref-meta{font-size:13px;color:var(--muted);}
+    .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .download{margin-top:8px;}
+    @media(max-width:960px){
+      .card{grid-template-columns:1fr;gap:14px;}
+      .glass{width:88%;}
+    }
+    @media(max-width:520px){
+      h1{font-size:34px}
+      p.lead{font-size:15px;padding:0 10px}
+      .glass{width:92%;flex-direction:column;padding:14px;border-radius:20px}
+      .input{width:100%;padding:8px 0}
+      .btn{width:100%;justify-content:center}
+      .row{justify-content:space-between;width:100%;}
+    }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="brand"><span>Realflow AI</span></div>
+      <nav class="nav-links">
+        <a href="https://github.com" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="#docs">Docs</a>
+        <a href="#cta">Get Started</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="hero">
+    <div class="hero-inner">
+      <h1>Generate n8n automations from text</h1>
+      <p class="lead">Describe the workflow you want and Realflow AI will retrieve references, build, validate, and (optionally) ship it to your n8n.</p>
+
+      <div class="glass-wrap">
+        <div class="glass" role="search">
+          <input id="queryInput" class="input" placeholder="E.g. Send a Slack alert when a new Shopify order comes in" aria-label="workflow query">
+          <button id="generateBtn" class="btn" aria-label="Generate workflow">Generate →</button>
+        </div>
+
+        <div class="download">
+          <button id="downloadBtn" class="btn" disabled>Download JSON</button>
+        </div>
+
+        <div class="status" id="status"></div>
+      </div>
+    </div>
+  </main>
+
+  <section class="card-area">
+    <div class="card" id="resultCard" hidden>
+      <div>
+        <div class="row" style="margin-bottom:6px;">
+          <div class="section-title">Implementation Plan</div>
+          <span id="confidencePill" class="pill info">--</span>
+          <span id="statusPill" class="pill info">Status</span>
+        </div>
+        <p id="plan" class="muted">Waiting for a request...</p>
+        <div style="margin-top:16px;">
+          <div class="section-title">Workflow JSON</div>
+          <pre id="workflowJson">// Generate to view workflow JSON</pre>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Validation</div>
+        <div id="validation" class="muted">Pending.</div>
+
+        <div style="margin-top:16px;">
+          <div class="section-title">References</div>
+          <ul id="references" class="muted"></ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <script>
+    (() => {
+      const queryInput = document.getElementById('queryInput');
+      const generateBtn = document.getElementById('generateBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const statusEl = document.getElementById('status');
+      const resultCard = document.getElementById('resultCard');
+      const workflowJsonEl = document.getElementById('workflowJson');
+      const planEl = document.getElementById('plan');
+      const validationEl = document.getElementById('validation');
+      const referencesEl = document.getElementById('references');
+      const confidencePill = document.getElementById('confidencePill');
+      const statusPill = document.getElementById('statusPill');
+
+      let lastWorkflow = null;
+      let lastId = null;
+
+      const setStatus = (msg, tone = 'info') => {
+        const colors = { info: '#f7fbff', success: '#d1ffe8', warn: '#ffe4c4', error: '#ffd2d2' };
+        statusEl.textContent = msg;
+        statusEl.style.color = colors[tone] || colors.info;
+      };
+
+      const setPill = (el, text, tone) => {
+        el.textContent = text;
+        el.className = 'pill ' + (tone || 'info');
+      };
+
+      const renderReferences = (refs = []) => {
+        referencesEl.innerHTML = '';
+        if (!refs.length) {
+          referencesEl.innerHTML = '<li class="muted">No references returned.</li>';
+          return;
+        }
+        refs.forEach(ref => {
+          const li = document.createElement('li');
+          li.className = 'ref-item';
+          li.innerHTML = `
+            <div class="ref-title">${ref.filename || 'Unknown file'}</div>
+            <div class="ref-meta">Score: ${ref.score ?? '-'} • Integrations: ${ref.integrations || 'N/A'} • Categories: ${ref.categories || 'N/A'}</div>
+          `;
+          referencesEl.appendChild(li);
+        });
+      };
+
+      const renderValidation = (validation = {}) => {
+        const parts = [];
+        if (validation.basic_valid === false) parts.push(`Basic validation failed: ${validation.basic_error || 'Unknown issue'}`);
+        if (validation.advanced_valid === false) parts.push(`Advanced validation warnings: ${validation.advanced_summary || 'See issues'}`);
+        if (Array.isArray(validation.issues) && validation.issues.length) {
+          parts.push('Issues: ' + validation.issues.join('; '));
+        }
+        validationEl.textContent = parts.length ? parts.join(' | ') : 'Validation passed.';
+      };
+
+      const enableUi = (enabled) => {
+        generateBtn.disabled = !enabled;
+        downloadBtn.disabled = !lastWorkflow || !enabled;
+        queryInput.disabled = !enabled;
+      };
+
+      const downloadLast = () => {
+        if (!lastWorkflow) {
+          setStatus('No workflow to download yet.', 'warn');
+          return;
+        }
+        const blob = new Blob([JSON.stringify(lastWorkflow, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `realflow_workflow_${lastId || 'latest'}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      };
+
+      const generate = async () => {
+        const query = queryInput.value.trim();
+        if (!query) {
+          setStatus('Please enter a query.', 'warn');
+          queryInput.focus();
+          return;
+        }
+
+        setStatus('Generating workflow...', 'info');
+        enableUi(false);
+        resultCard.hidden = false;
+        workflowJsonEl.textContent = '// Working on it...';
+        planEl.textContent = 'Building plan...';
+
+        try {
+          const res = await fetch('/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              query,
+              top_k: 3,
+              upload_to_n8n: true
+            })
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.detail || 'Failed to generate workflow');
+          }
+
+          lastWorkflow = data.workflow;
+          lastId = data.id;
+          downloadBtn.disabled = !lastWorkflow;
+
+          workflowJsonEl.textContent = JSON.stringify(data.workflow, null, 2);
+          planEl.textContent = data.implementation_plan || 'No plan provided.';
+          renderValidation(data.validation || {});
+          renderReferences(data.references || []);
+
+          // Confidence/status pills
+          const confidence = data.confidence_label || 'MEDIUM';
+          const status = data.status || 'success';
+          const confTone = confidence === 'HIGH' ? 'success' : confidence === 'MEDIUM' ? 'warn' : 'error';
+          const statusTone = status === 'success' ? 'success' : status === 'warning' ? 'warn' : 'error';
+          setPill(confidencePill, `Confidence: ${confidence}`, confTone);
+          setPill(statusPill, `Status: ${status}`, statusTone);
+
+          setStatus('Workflow generated.', 'success');
+        } catch (err) {
+          console.error(err);
+          setStatus(err.message || 'Generation failed', 'error');
+          workflowJsonEl.textContent = '// Generation failed';
+        } finally {
+          enableUi(true);
+        }
+      };
+
+      generateBtn.addEventListener('click', generate);
+      queryInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') generate(); });
+      downloadBtn.addEventListener('click', downloadLast);
+    })();
+  </script>
+</body>
+</html>
+
+
