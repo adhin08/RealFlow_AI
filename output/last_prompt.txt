@@ -1,0 +1,530 @@
+
+You are an expert n8n workflow architect.
+Your goal is to help the user build an automation based on their request.
+Use the provided Reference Workflows as a base/inspiration.
+Always output valid JSON if asked for code.
+
+
+USER REQUEST: When a new Shopify order comes in, log the order details to Google Sheets and send a notification to Slack.
+
+REFERENCE WORKFLOWS FOUND:
+--- WORKFLOW 1 ---
+Title: WooCommerce to Slack Notification
+One Liner: Triggered workflow for WooCommerce orders to send Slack notifications.
+Summary: This workflow automatically triggers when a new WooCommerce order is created, sends a notification to Slack with key order details, and includes conditional logic for price checks.
+Integrations: WooCommerce, Slack, n8n
+Steps: WooCommerce order created triggers workflow., Checks if order total is over 100., Sends Slack notification with order details., Handles errors with error handler.
+
+REFERENCE WORKFLOW JSON (1151_Woocommerce_Slack_Create_Triggered.json):
+```json
+{
+  "id": 81,
+  "name": "New WooCommerce order to Slack",
+  "nodes": [
+    {
+      "name": "Order Created",
+      "type": "n8n-nodes-base.wooCommerceTrigger",
+      "position": [
+        340,
+        500
+      ],
+      "webhookId": "{{WEBHOOK_ID}}",
+      "parameters": {
+        "event": "order.created"
+      },
+      "credentials": {
+        "wooCommerceApi": "{{CRED_ORDER_CREATED}}"
+      },
+      "typeVersion": 1,
+      "id": "REDACTED_PLACEHOLDER",
+      "notes": "This wooCommerceTrigger node performs automated tasks as part of the workflow."
+    },
+    {
+      "name": "Send to Slack",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        780,
+        480
+      ],
+      "parameters": {
+        "text": ":sparkles: There is a new order :sparkles:",
+        "channel": "woo-commerce",
+        "blocksUi": {
+          "blocksValues": []
+        },
+        "attachments": [
+          {
+            "color": "#66FF00",
+            "fields": {
+              "item": [
+                {
+                  "short": true,
+                  "title": "Order ID",
+                  "value": "={{$json[\"id\"]}}"
+                },
+                {
+                  "short": true,
+                  "title": "Status",
+                  "value": "={{$json[\"status\"]}}"
+                },
+                {
+                  "short": true,
+                  "title": "Total",
+                  "value": "={{$json[\"currency_symbol\"]}}{{$json[\"total\"]}}"
+                },
+                {
+                  "short": false,
+                  "title": "Link",
+                  "value": "={{$node[\"Order Created\"].json[\"_links\"][\"self\"][0][\"href\"]}}"
+                }
+              ]
+            },
+            "footer": "=*Ordered:* {{$json[\"date_created\"]}} | *Transaction ID:* {{$json[\"transaction_id\"]}}"
+          }
+        ],
+        "otherOptions": {}
+      },
+      "credentials": {
+        "slackApi": "{{CRED_SLACK}}"
+      },
+      "typeVersion": 1,
+      "id": "REDACTED_PLACEHOLDER",
+      "notes": "This slack node performs automated tasks as part of the workflow."
+    },
+    {
+      "name": "Price over 100",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        540,
+        500
+      ],
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json[\"total\"]}}",
+              "value2": 100,
+              "operation": "largerEqual"
+            }
+          ]
+        }
+      },
+      "typeVersion": 1,
+      "id": "REDACTED_PLACEHOLDER",
+      "notes": "This if node performs automated tasks as part of the workflow."
+    },
+    {
+      "id": "error-9c281bc4",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        400
+      ],
+      "parameters": {
+        "message": "Workflow execution error",
+        "options": {}
+      }
+    }
+  ],
+  "active": false,
+  "settings": {
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "saveDataSuccessExecution": "all",
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": null,
+    "timezone": "UTC",
+    "executionTimeout": 3600,
+    "maxExecutions": 1000,
+    "retryOnFail": true,
+    "retryCount": 3,
+    "retryDelay": 1000
+  },
+  "connections": {},
+  "description": "Automated workflow: New WooCommerce order to Slack. This workflow processes data and performs automated tasks.",
+  "meta": {
+    "instanceId": "{{INSTANCE_ID}}",
+    "versionId": "1.0.0",
+    "createdAt": "2025-09-29T07:08:01.603039",
+    "updatedAt": "2025-09-29T07:08:01.603047",
+    "owner": "{{OWNER}}",
+    "license": "MIT",
+    "category": "automation",
+    "status": "active",
+    "priority": "high",
+    "environment": "production"
+  },
+  "tags": [
+    "automation",
+    "n8n",
+    "production-ready",
+    "excellent",
+    "optimized"
+  ],
+  "notes": "Excellent quality workflow: New WooCommerce order to Slack. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+}
+```
+
+--- WORKFLOW 2 ---
+Title: WooCommerce Product to Slack
+One Liner: Automatically sends new WooCommerce product details to Slack.
+Summary: This workflow triggers on a new product creation in WooCommerce and sends a formatted message to a Slack channel, including product name, price, sale price, and link.
+Integrations: WooCommerce, Slack, n8n
+Steps: Trigger on product creation, Format product data, Send to Slack channel, Handle errors
+
+REFERENCE WORKFLOW JSON (1148_Woocommerce_Slack_Create_Triggered.json):
+```json
+{
+  "id": 80,
+  "name": "New WooCommerce product to Slack",
+  "nodes": [
+    {
+      "name": "Product Created",
+      "type": "n8n-nodes-base.wooCommerceTrigger",
+      "position": [
+        320,
+        500
+      ],
+      "webhookId": "{{WEBHOOK_ID}}",
+      "parameters": {
+        "event": "product.created"
+      },
+      "credentials": {
+        "wooCommerceApi": "{{CRED_PRODUCT_CREATED}}"
+      },
+      "typeVersion": 1,
+      "id": "REDACTED_PLACEHOLDER",
+      "notes": "This wooCommerceTrigger node performs automated tasks as part of the workflow."
+    },
+    {
+      "name": "Send to Slack",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        540,
+        500
+      ],
+      "parameters": {
+        "text": ":new: A new product has been added! :new:",
+        "channel": "woo-commerce",
+        "blocksUi": {
+          "blocksValues": []
+        },
+        "attachments": [
+          {
+            "color": "#66FF00",
+            "fields": {
+              "item": [
+                {
+                  "short": false,
+                  "title": "Name",
+                  "value": "={{$json[\"name\"]}}"
+                },
+                {
+                  "short": true,
+                  "title": "Price",
+                  "value": "={{$json[\"regular_price\"]}}"
+                },
+                {
+                  "short": true,
+                  "title": "Sale Price",
+                  "value": "={{$json[\"sale_price\"]}}"
+                },
+                {
+                  "short": false,
+                  "title": "Link",
+                  "value": "={{$json[\"permalink\"]}}"
+                }
+              ]
+            },
+            "footer": "=Added: {{$json[\"date_created\"]}}"
+          }
+        ],
+        "otherOptions": {}
+      },
+      "credentials": {
+        "slackApi": "{{CRED_SLACK}}"
+      },
+      "typeVersion": 1,
+      "id": "REDACTED_PLACEHOLDER",
+      "notes": "This slack node performs automated tasks as part of the workflow."
+    },
+    {
+      "id": "error-feb7e29f",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        400
+      ],
+      "parameters": {
+        "message": "Workflow execution error",
+        "options": {}
+      }
+    }
+  ],
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": null,
+    "timezone": "UTC",
+    "executionTimeout": 3600,
+    "maxExecutions": 1000,
+    "retryOnFail": true,
+    "retryCount": 3,
+    "retryDelay": 1000
+  },
+  "connections": {},
+  "description": "Automated workflow: New WooCommerce product to Slack. This workflow processes data and performs automated tasks.",
+  "meta": {
+    "instanceId": "{{INSTANCE_ID}}",
+    "versionId": "1.0.0",
+    "createdAt": "2025-09-29T07:08:01.615711",
+    "updatedAt": "2025-09-29T07:08:01.615748",
+    "owner": "{{OWNER}}",
+    "license": "MIT",
+    "category": "automation",
+    "status": "active",
+    "priority": "high",
+    "environment": "production"
+  },
+  "tags": [
+    "automation",
+    "n8n",
+    "production-ready",
+    "excellent",
+    "optimized"
+  ],
+  "notes": "Excellent quality workflow: New WooCommerce product to Slack. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+}
+```
+
+--- WORKFLOW 3 ---
+Title: Shopify to HubSpot Deal
+One Liner: Automates creating deals in HubSpot when Shopify orders are updated.
+Summary: This workflow triggers on Shopify order updates, processes customer data, and creates or updates deals in HubSpot with associated contact information.
+Integrations: Shopify, HubSpot, n8n
+Steps: Trigger on Shopify order update, Check if deal exists in HubSpot, Create new deal if not found, Update or create associated contact in HubSpot
+
+REFERENCE WORKFLOW JSON (0265_Shopify_HubSpot_Create_Triggered.json):
+```json
+{
+  "meta": {
+    "instanceId": "{{INSTANCE_ID}}",
+    "versionId": "1.0.0",
+    "createdAt": "2025-09-29T07:07:52.259008",
+    "updatedAt": "2025-09-29T07:07:52.259019",
+    "owner": "{{OWNER}}",
+    "license": "MIT",
+    "category": "automation",
+    "status": "active",
+    "priority": "high",
+    "environment": "production"
+  },
+  "nodes": [
+    {
+      "id": "REDACTED_PLACEHOLDER",
+      "name": "On order updated",
+      "type": "n8n-nodes-base.shopifyTrigger",
+      "position": [
+        380,
+        200
+      ],
+      "webhookId": "{{WEBHOOK_ID}}",
+      "parameters": {
+        "topic": "orders/updated"
+      },
+      "credentials": {
+        "shopifyApi": "{{CRED_SHOPIFY}}"
+      },
+      "typeVersion": 1,
+      "notes": "This shopifyTrigger node performs automated tasks as part of the workflow."
+    },
+    {
+      "id": "REDACTED_PLACEHOLDER",
+      "name": "Keep only userId",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        860,
+        280
+      ],
+      "parameters": {
+        "values": {
+          "number": [
+            {
+              "name": "userId",
+              "value": "={{ $json[\"vid\"] }}"
+            }
+          ]
+        },
+        "options": {},
+        "keepOnlySet": true
+      },
+      "typeVersion": 1,
+      "notes": "This set node performs automated tasks as part of the workflow."
+    },
+    {
+      "id": "REDACTED_PLACEHOLDER",
+      "name": "New Order, deal not found",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1560,
+        220
+      ],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json}}",
+              "operation": "isEmpty"
+            }
+          ]
+        }
+      },
+      "typeVersion": 1,
+      "notes": "This if node performs automated tasks as part of the workflow."
+    },
+    {
+      "id": "REDACTED_PLACEHOLDER",
+      "name": "Do Nothing",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        1800,
+        320
+      ],
+      "parameters": {},
+      "typeVersion": 1,
+      "notes": "This noOp node performs automated tasks as part of the workflow."
+    },
+    {
+      "id": "REDACTED_PLACEHOLDER",
+      "name": "Create new deal",
+      "type": "n8n-nodes-base.hubspot",
+      "position": [
+        1800,
+        120
+      ],
+      "parameters": {
+        "stage": "closedwon",
+        "authentication": "{{ $credentials.oAuth2 }}",
+        "additionalFields": {
+          "amount": "={{ $node[\"Add Hubspot userId to data\"].json[\"current_total_price\"] }}",
+          "dealName": "={{ $node[\"Add Hubspot userId to data\"].json[\"name\"] }}",
+          "closeDate": "={{ $node[\"Add Hubspot userId to data\"].json[\"created_at\"] }}",
+          "associatedVids": "={{ $node[\"Add Hubspot userId to data\"].json[\"userId\"] }}"
+        }
+      },
+      "credentials": {
+        "hubspotOAuth2Api": "{{CRED_CREATE_NEW_DEAL}}"
+      },
+      "typeVersion": 1,
+      "notes": "This hubspot node performs automated tasks as part of the workflow."
+    },
+    {
+      "id": "REDACTED_PLACEHOLDER",
+      "name": "Find if order already exists as deal",
+      "type": "n8n-nodes-base.hubspot",
+      "position": [
+        1340,
+        220
+      ],
+      "parameters": {
+        "operation": "search",
+        "authentication": "{{ $credentials.oAuth2 }}",
+        "additionalFields": {
+          "query": "={{ $json[\"name\"] }}"
+        }
+      },
+      "credentials": {
+        "hubspotOAuth2Api": "{{CRED_FIND_IF_ORDER_ALREAD}}"
+      },
+      "typeVersion": 1,
+      "alwaysOutputData": true,
+      "notes": "This hubspot node performs automated tasks as part of the workflow."
+    },
+    {
+      "id": "REDACTED_PLACEHOLDER",
+      "name": "Add Hubspot userId to data",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1140,
+        220
+      ],
+      "parameters": {
+        "mode": "mergeByIndex"
+      },
+      "typeVersion": 1,
+      "notes": "This merge node performs automated tasks as part of the workflow."
+    },
+    {
+      "id": "REDACTED_PLACEHOLDER",
+      "name": "Create or update contact",
+      "type": "n8n-nodes-base.hubspot",
+      "position": [
+        640,
+        280
+      ],
+      "parameters": {
+        "email": "={{ $json[\"contact_email\"] }}",
+        "resource": "contact",
+        "authentication": "{{ $credentials.oAuth2 }}",
+        "additionalFields": {
+          "city": "={{ $json[\"customer\"][\"default_address\"][\"city\"] }}",
+          "country": "={{ $json[\"customer\"][\"default_address\"][\"country\"] }}",
+          "lastName": "={{ $json[\"customer\"][\"default_address\"][\"last_name\"] }}",
+          "firstName": "={{ $json[\"customer\"][\"default_address\"][\"first_name\"] }}"
+        }
+      },
+      "credentials": {
+        "hubspotOAuth2Api": "{{CRED_CREATE_OR_UPDATE_CON}}"
+      },
+      "typeVersion": 1,
+      "notes": "This hubspot node performs automated tasks as part of the workflow."
+    },
+    {
+      "id": "error-c41fbad1",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        400
+      ],
+      "parameters": {
+        "message": "Workflow execution error",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {},
+  "name": "Shopifytrigger Workflow",
+  "description": "Automated workflow: Shopifytrigger Workflow. This workflow processes data and performs automated tasks.",
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": null,
+    "timezone": "UTC",
+    "executionTimeout": 3600,
+    "maxExecutions": 1000,
+    "retryOnFail": true,
+    "retryCount": 3,
+    "retryDelay": 1000
+  },
+  "tags": [
+    "automation",
+    "n8n",
+    "production-ready",
+    "excellent",
+    "optimized"
+  ],
+  "notes": "Excellent quality workflow: Shopifytrigger Workflow. This workflow has been optimized for production use with comprehensive error handling, security, and documentation."
+}
+```
+
+Please analyze the request and suggest an implementation plan or specific nodes to use.

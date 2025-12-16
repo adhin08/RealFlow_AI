@@ -1,0 +1,128 @@
+{
+  "name": "Convert Excel to Google Sheets and Notify",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Google Drive Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "position": [
+        250,
+        300
+      ],
+      "parameters": {
+        "event": "files:create",
+        "mimeTypes": [
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        ]
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "2",
+      "name": "Download Excel File",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        500,
+        300
+      ],
+      "parameters": {
+        "operation": "download",
+        "fileId": "={{$json.id}}"
+      },
+      "typeVersion": 3
+    },
+    {
+      "id": "3",
+      "name": "Read Excel Data",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "position": [
+        750,
+        300
+      ],
+      "parameters": {
+        "operation": "fromFile",
+        "fileFormat": "xlsx"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "4",
+      "name": "Create Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1000,
+        300
+      ],
+      "parameters": {
+        "operation": "create",
+        "spreadsheetName": "={{$json.name.replace('.xlsx', '')}}",
+        "worksheetName": "Sheet1",
+        "data": "={{$json.data}}"
+      },
+      "typeVersion": 4
+    },
+    {
+      "id": "5",
+      "name": "Send Telegram Notification",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1250,
+        300
+      ],
+      "parameters": {
+        "operation": "sendMessage",
+        "text": "Excel file '{{$json.name}}' has been converted to Google Sheets: https://docs.google.com/spreadsheets/d/{{$json.spreadsheetId}}",
+        "chatId": "YOUR_TELEGRAM_CHAT_ID"
+      },
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download Excel File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Excel File": {
+      "main": [
+        [
+          {
+            "node": "Read Excel Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Excel Data": {
+      "main": [
+        [
+          {
+            "node": "Create Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "active": false
+}

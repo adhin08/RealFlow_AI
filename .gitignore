@@ -14,7 +14,10 @@ env/
 *.swp
 *.swo
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> e9188b8 (Update files)
 # OS
 .DS_Store
 Thumbs.db

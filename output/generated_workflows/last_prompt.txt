@@ -1,0 +1,212 @@
+You are an expert n8n workflow architect with deep knowledge of automation patterns, integrations, and best practices.
+
+## User Request
+When Excel file is uploaded to Google Drive, convert it to Google Sheets and send Telegram notification
+
+## Reference Workflows
+The following are similar workflows from our template library that you should use as inspiration and reference:
+
+### Reference Workflow 1: 1797_Telegram_GoogleDrive_Create_Triggered.json
+- **Services**: N/A
+- **Categories**: error-handling,file-management,notification
+- **Integrations**: Google Drive,Telegram
+
+**Description:**
+
+Title: Save New Files Received On Telegram To Google Drive
+Description: This workflow triggers when a service event occurs. It processes data using Google Drive and Telegram. It includes error handling.
+Integrations: Google Drive, Telegram
+Categories: error-handling, file-management, notification
+Trigger: service
+
+
+**Full Workflow JSON:**
+```json
+{}
+```
+
+### Reference Workflow 2: 1983_Splitout_Converttofile_Automation_Webhook.json
+- **Services**: N/A
+- **Categories**: data-sync,file-management
+- **Integrations**: Google Drive,Google Sheets,HTTP Request
+
+**Description:**
+
+Title: Template Demo Chatgpt Image 1 With Drive And Sheet Copy
+Description: This workflow triggers manually. It processes data using Google Drive, Google Sheets, and HTTP Request.
+Integrations: Google Drive, Google Sheets, HTTP Request
+Categories: data-sync, file-management
+Trigger: manual
+
+
+**Full Workflow JSON:**
+```json
+{}
+```
+
+
+## Your Task
+1. **Analyze** the user's request carefully to understand what they want to automate.
+2. **Compare** with the reference workflows to identify relevant patterns, node types, and configurations.
+3. **Design** a complete n8n workflow that fulfills the user's request.
+4. **Keep it simple** - only include nodes that are necessary for the task.
+
+## CRITICAL RULES
+
+### Node Connections
+- Only connect nodes that should execute in sequence
+- Do NOT put error/stop nodes in the main success flow
+- The last action node should have NO outgoing connections (empty array)
+
+### Common n8n Expressions (USE THESE EXACTLY)
+
+**Telegram:**
+- Chat ID from trigger: `={{$json.message.chat.id}}`
+- Message text from trigger: `={{$json.message.text}}`
+- User name: `={{$json.message.from.first_name}}`
+
+**Email/Gmail:**
+- Sender: `={{$json.from}}`
+- Subject: `={{$json.subject}}`
+- Body: `={{$json.text}}`
+
+**Webhook:**
+- Access body data: `={{$json.fieldName}}`
+- Access query params: `={{$json.query.paramName}}`
+
+**Google Sheets:**
+- Reference previous node: `={{$json.columnName}}`
+
+**Slack:**
+- Use channel name with #: `#channel-name`
+
+### Error Handling Rules
+- For simple workflows (2-3 nodes): Do NOT include error handlers
+- For complex workflows: Use a separate error workflow, not inline error nodes
+- NEVER connect stopAndError nodes to the main success path
+
+### CRITICAL: Node Type Versions (USE EXACTLY)
+**Always use these typeVersion values:**
+- telegramTrigger: `typeVersion: 1`
+- telegram: `typeVersion: 1`
+- googleDriveTrigger: `typeVersion: 1`
+- googleDrive: `typeVersion: 3`
+- googleSheetsTrigger: `typeVersion: 1`
+- googleSheets: `typeVersion: 4`
+- slack: `typeVersion: 2`
+- webhook: `typeVersion: 2`
+- httpRequest: `typeVersion: 4`
+- if: `typeVersion: 2`
+- set: `typeVersion: 3`
+- code: `typeVersion: 2`
+- cron: `typeVersion: 1`
+- schedule: `typeVersion: 1`
+- spreadsheetFile: `typeVersion: 2`
+
+### Google Drive File Upload (IMPORTANT)
+When uploading files to Google Drive, use this structure:
+```json
+{
+  "type": "n8n-nodes-base.googleDrive",
+  "typeVersion": 3,
+  "parameters": {
+    "name": "={{$json.fileName}}",
+    "driveId": {"__rl": true, "mode": "list", "value": "My Drive"},
+    "folderId": {"__rl": true, "mode": "list", "value": "root"}
+  }
+}
+```
+
+### Telegram File Downloads
+To receive files from Telegram, add `download: true`:
+```json
+{
+  "type": "n8n-nodes-base.telegramTrigger",
+  "typeVersion": 1,
+  "parameters": {
+    "updates": ["message"],
+    "additionalFields": {"download": true}
+  }
+}
+```
+
+### Excel/CSV to Google Sheets Conversion (IMPORTANT)
+There is NO "convert" operation in Google Drive! To convert Excel to Sheets:
+1. Download the file from Google Drive (binary)
+2. Use Spreadsheet File node to read Excel → JSON
+3. Use Google Sheets node to write JSON data
+
+Example pattern:
+```json
+[
+  {"name": "Download File", "type": "n8n-nodes-base.googleDrive", "typeVersion": 3, "parameters": {"operation": "download", "fileId": "={{$json.id}}"}},
+  {"name": "Read Excel", "type": "n8n-nodes-base.spreadsheetFile", "typeVersion": 2, "parameters": {"operation": "fromFile"}},
+  {"name": "Write to Sheets", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4, "parameters": {"operation": "append"}}
+]
+```
+
+### Binary File Operations
+- Download file: `googleDrive` with `operation: "download"`
+- Read Excel/CSV: `spreadsheetFile` with `operation: "fromFile"`
+- Write Excel/CSV: `spreadsheetFile` with `operation: "toFile"`
+- Read binary: `readBinaryFile`
+- Write binary: `writeBinaryFile`
+
+## Output Format
+
+## Implementation Plan
+[Brief explanation of the workflow]
+
+## Complete Workflow JSON
+```json
+{
+  "name": "<descriptive workflow name>",
+  "nodes": [...],
+  "connections": {...},
+  "settings": {},
+  "active": false
+}
+```
+
+## Example: Simple Telegram Reply Bot
+```json
+{
+  "name": "Telegram Hello Bot",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Telegram Trigger", 
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [250, 300],
+      "parameters": {"updates": ["message"]},
+      "typeVersion": 1
+    },
+    {
+      "id": "2",
+      "name": "Reply",
+      "type": "n8n-nodes-base.telegram", 
+      "position": [500, 300],
+      "parameters": {
+        "operation": "sendMessage",
+        "text": "hello",
+        "chatId": "={{$json.message.chat.id}}"
+      },
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [[{"node": "Reply", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {},
+  "active": false
+}
+```
+
+## Requirements
+1. Valid JSON only
+2. Connections MUST use node NAMES not IDs. Example: "NodeName": {"main": [[{"node": "OtherNodeName"}]]}
+3. Use the EXACT expressions shown above for each service
+4. Keep workflows minimal - no unnecessary nodes
+5. Every node must have both "id" and "name" fields

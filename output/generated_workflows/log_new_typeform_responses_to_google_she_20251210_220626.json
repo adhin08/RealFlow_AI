@@ -1,0 +1,115 @@
+{
+  "name": "Typeform to Google Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "formId": "YOUR_TYPEFORM_ID"
+      },
+      "name": "Typeform Trigger",
+      "type": "n8n-nodes-base.typeformTrigger",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ],
+      "credentials": {
+        "typeformApi": "{{CRED_TYPEFORM_TRIGGER}}"
+      },
+      "id": "1",
+      "notes": "Captures new Typeform submissions"
+    },
+    {
+      "parameters": {
+        "sheetId": "YOUR_GOOGLE_SHEETS_ID",
+        "operation": "append",
+        "range": "Responses!A:Z",
+        "options": {}
+      },
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 1,
+      "position": [
+        550,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": "{{CRED_GOOGLESHEETS}}"
+      },
+      "id": "2",
+      "notes": "Appends Typeform responses to Google Sheet"
+    },
+    {
+      "parameters": {
+        "message": "Failed to log Typeform responses to Google Sheets",
+        "options": {}
+      },
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        800,
+        300
+      ],
+      "id": "3",
+      "notes": "Handles execution errors"
+    }
+  ],
+  "connections": {
+    "Trigger": {
+      "main": [
+        [
+          {
+            "node": "2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": null,
+    "timezone": "UTC",
+    "executionTimeout": 3600,
+    "maxExecutions": 1000,
+    "retryOnFail": true,
+    "retryCount": 3,
+    "retryDelay": 1000
+  },
+  "description": "Logs new Typeform responses to Google Sheets automatically",
+  "meta": {
+    "instanceId": "{{INSTANCE_ID}}",
+    "versionId": "1.0.0",
+    "createdAt": "2023-11-15T12:00:00.000Z",
+    "updatedAt": "2023-11-15T12:00:00.000Z",
+    "owner": "{{OWNER}}",
+    "license": "MIT",
+    "category": "automation",
+    "status": "active",
+    "priority": "medium",
+    "environment": "production"
+  },
+  "tags": [
+    "automation",
+    "n8n",
+    "production-ready",
+    "form-processing",
+    "data-sync"
+  ],
+  "notes": "This workflow automatically logs all new Typeform submissions to a specified Google Sheet. It includes basic error handling to ensure reliability."
+}

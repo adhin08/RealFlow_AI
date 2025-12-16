@@ -1,0 +1,145 @@
+{
+  "name": "Email to Slack Notification",
+  "nodes": [
+    {
+      "name": "Monitor Email Inbox",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 1,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "options": {
+          "folder": "INBOX"
+        },
+        "connectionLimit": 1,
+        "operation": "getAll"
+      },
+      "credentials": {
+        "imap": "{{CRED_EMAIL_IMAP}}"
+      },
+      "id": "email-read-imap-node",
+      "notes": "This node monitors the email inbox for new messages and retrieves them."
+    },
+    {
+      "name": "Send Slack Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [
+        600,
+        300
+      ],
+      "parameters": {
+        "text": "New email received!",
+        "channel": "#general",
+        "blocksUi": {
+          "blocksValues": [
+            {
+              "type": "section",
+              "blockId": "header",
+              "text": {
+                "type": "mrkdwn",
+                "text": "*New Email Notification*"
+              }
+            },
+            {
+              "type": "divider",
+              "blockId": "divider1"
+            },
+            {
+              "type": "section",
+              "blockId": "email-details",
+              "fields": [
+                {
+                  "type": "mrkdwn",
+                  "text": "*From:*\n{{$node[\"email-read-imap-node\"].json[\"from\"]}}"
+                },
+                {
+                  "type": "mrkdwn",
+                  "text": "*Subject:*\n{{$node[\"email-read-imap-node\"].json[\"subject\"]}}"
+                }
+              ]
+            },
+            {
+              "type": "section",
+              "blockId": "email-preview",
+              "text": {
+                "type": "mrkdwn",
+                "text": "Preview:\n```{{$node[\"email-read-imap-node\"].json[\"textPlain\"].substring(0, 100)}}...```"
+              }
+            },
+            {
+              "type": "context",
+              "blockId": "context",
+              "elements": [
+                {
+                  "type": "mrkdwn",
+                  "text": "Notification sent by {{ENV.N8N_WORKFLOW_NAME}} workflow"
+                }
+              ]
+            }
+          ]
+        },
+        "otherOptions": {
+          "mrkdwn": true
+        }
+      },
+      "credentials": {
+        "slackApi": "{{CRED_SLACK_API}}"
+      },
+      "id": "slack-notification-node",
+      "notes": "This node sends a formatted Slack notification with email details."
+    },
+    {
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        800,
+        300
+      ],
+      "parameters": {
+        "message": "Failed to process email or send Slack notification",
+        "options": {
+          "continueOnFail": false
+        }
+      },
+      "id": "error-handler-node",
+      "notes": "This node handles any errors that occur during workflow execution."
+    }
+  ],
+  "connections": {
+    "email-read-imap-node": {
+      "main": [
+        [
+          {
+            "node": "slack-notification-node",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "error-handler-node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": null,
+    "timezone": "UTC",
+    "executionTimeout": 3600,
+    "maxExecutions": 1000,
+    "retryOnFail": true,
+    "retryCount": 3,
+    "retryDelay": 1000
+  },
+  "active": false
+}
