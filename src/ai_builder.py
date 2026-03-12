@@ -100,7 +100,7 @@ FREE_MODELS = {
 }
 
 # Default model (best free option for JSON generation)
-DEFAULT_FREE_MODEL = "mistralai/devstral-2512:free"
+DEFAULT_FREE_MODEL = "mistralai/mistral-7b-instruct:free"
 
 
 def load_workflow_json_content(filename: str) -> str:
