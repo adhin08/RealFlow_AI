@@ -100,7 +100,7 @@ FREE_MODELS = {
 }
 
 # Default model (best free option for JSON generation)
-DEFAULT_FREE_MODEL = "google/gemma-3-27b-it:free"
+DEFAULT_FREE_MODEL = "meta-llama/llama-3.3-70b-instruct:free"
 
 
 def load_workflow_json_content(filename: str) -> str:
