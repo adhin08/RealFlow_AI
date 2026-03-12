@@ -100,7 +100,7 @@ FREE_MODELS = {
 }
 
 # Default model (best free option for JSON generation)
-DEFAULT_FREE_MODEL = "mistralai/mistral-7b-instruct:free"
+DEFAULT_FREE_MODEL = "nvidia/llama-nemotron-embed-vl-1b-v2:free"
 
 
 def load_workflow_json_content(filename: str) -> str:
