@@ -100,7 +100,7 @@ FREE_MODELS = {
 }
 
 # Default model (best free option for JSON generation)
-DEFAULT_FREE_MODEL = "nvidia/nemotron-3-super-120b-a12b:free"
+DEFAULT_FREE_MODEL = "google/gemma-3-27b-it:free"
 
 
 def load_workflow_json_content(filename: str) -> str:
