@@ -237,24 +237,30 @@ Examples:
     # =========================================================================
     print_section("Step 3: Calling LLM")
     
-    # Check for API key (OpenRouter or OpenAI)
+    # Check for API key (Groq, OpenRouter, or OpenAI)
+    has_groq = os.environ.get("GROQ_API_KEY")
     has_openrouter = os.environ.get("OPENROUTER_API_KEY")
     has_openai = os.environ.get("OPENAI_API_KEY")
     
-    if not has_openrouter and not has_openai:
+    if not has_groq and not has_openrouter and not has_openai:
         print("[ERROR] No LLM API key configured.")
         print()
-        print("  Option 1 (Recommended - FREE models):")
+        print("  Option 1 (Recommended - Groq):")
+        print("    export GROQ_API_KEY=gsk_...")
+        print()
+        print("  Option 2 (OpenRouter - FREE models):")
         print("    export OPENROUTER_API_KEY=sk-or-...")
         print("    Get your key at: https://openrouter.ai/keys")
         print()
-        print("  Option 2 (OpenAI - Paid):")
+        print("  Option 3 (OpenAI - Paid):")
         print("    export OPENAI_API_KEY=sk-...")
         print()
         print("  Run --list-models to see available free models.")
         sys.exit(1)
     
-    if has_openrouter:
+    if has_groq:
+        print(f"  Using: Groq API")
+    elif has_openrouter:
         print(f"  Using: OpenRouter API")
     else:
         print(f"  Using: OpenAI API")

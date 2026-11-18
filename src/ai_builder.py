@@ -28,8 +28,12 @@ except ImportError:
 
 
 # ============================================================================
-# OpenRouter Configuration
+# Groq & OpenRouter Configuration
 # ============================================================================
+
+# Groq API configuration (Recommended: Fast & reliable)
+GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+DEFAULT_GROQ_MODEL = "qwen/qwen3.8-27b"
 
 # OpenRouter API base URL
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
@@ -99,8 +103,8 @@ FREE_MODELS = {
     }
 }
 
-# Default model (best free option for JSON generation)
-DEFAULT_FREE_MODEL = "stepfun/step-3.5-flash:free"
+# Default model (can be overridden with LLM_MODEL env var)
+DEFAULT_FREE_MODEL = os.environ.get("LLM_MODEL", "stepfun/step-3.5-flash:free")
 
 
 def load_workflow_json_content(filename: str) -> str:
@@ -342,11 +346,12 @@ Example pattern:
 
 def get_llm_client() -> Tuple[Optional[Any], str, str]:
     """
-    Get an LLM client (OpenRouter or OpenAI).
+    Get an LLM client (Groq, OpenRouter, or OpenAI).
     
     Priority:
-    1. OPENROUTER_API_KEY -> Use OpenRouter
-    2. OPENAI_API_KEY -> Use OpenAI directly
+    1. GROQ_API_KEY -> Use Groq (Fast & Reliable)
+    2. OPENROUTER_API_KEY -> Use OpenRouter
+    3. OPENAI_API_KEY -> Use OpenAI directly
     
     Returns:
         Tuple of (client, provider_name, default_model)
@@ -356,22 +361,34 @@ def get_llm_client() -> Tuple[Optional[Any], str, str]:
         print("[ERROR] OpenAI package not installed. Run: pip install openai")
         return None, "", ""
     
-    # Check for OpenRouter first (preferred for free models)
+    # Check for Groq first (Recommended: ultra-fast and reliable)
+    groq_key = os.environ.get("GROQ_API_KEY")
+    if groq_key:
+        client = OpenAI(
+            api_key=groq_key,
+            base_url=GROQ_BASE_URL
+        )
+        model = os.environ.get("LLM_MODEL", DEFAULT_GROQ_MODEL)
+        return client, "Groq", model
+
+    # Check for OpenRouter (preferred for free models)
     openrouter_key = os.environ.get("OPENROUTER_API_KEY")
     if openrouter_key:
         client = OpenAI(
             api_key=openrouter_key,
             base_url=OPENROUTER_BASE_URL
         )
-        return client, "OpenRouter", DEFAULT_FREE_MODEL
+        model = os.environ.get("LLM_MODEL", DEFAULT_FREE_MODEL)
+        return client, "OpenRouter", model
     
     # Fall back to OpenAI
     openai_key = os.environ.get("OPENAI_API_KEY")
     if openai_key:
         client = OpenAI(api_key=openai_key)
-        return client, "OpenAI", "gpt-4o"
+        model = os.environ.get("LLM_MODEL", "gpt-4o")
+        return client, "OpenAI", model
     
-    print("[ERROR] No API key found. Set OPENROUTER_API_KEY or OPENAI_API_KEY")
+    print("[ERROR] No API key found. Set GROQ_API_KEY, OPENROUTER_API_KEY, or OPENAI_API_KEY")
     return None, "", ""
 
 
