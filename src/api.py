@@ -95,6 +95,17 @@ generated_workflows = {}
 # Endpoints
 # ============================================================================
 
+@app.on_event("startup")
+def startup_warmup():
+    """Warm up ChromaDB model on server start so the first user query has zero cold-start delay."""
+    try:
+        from rag import search_workflows
+        list(search_workflows("test", n_results=1))
+        print("[STARTUP] ChromaDB model pre-warmed successfully.")
+    except Exception as e:
+        print(f"[STARTUP] ChromaDB warmup note: {e}")
+
+
 @app.get("/", response_class=HTMLResponse)
 async def serve_frontend():
     """Serve the landing page frontend (static HTML)."""
@@ -125,11 +136,10 @@ async def health_check():
 
 
 @app.post("/generate", response_model=WorkflowResponse)
-async def generate_workflow(request: GenerateRequest):
+def generate_workflow(request: GenerateRequest):
     """
     Generate an n8n workflow from natural language.
-    
-    This is the main endpoint for your SaaS.
+    Runs synchronously in threadpool to prevent blocking the event loop.
     """
     workflow_id = str(uuid.uuid4())[:8]
     

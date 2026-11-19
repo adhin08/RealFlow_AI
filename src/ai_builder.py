@@ -366,7 +366,8 @@ def get_llm_client() -> Tuple[Optional[Any], str, str]:
     if groq_key:
         client = OpenAI(
             api_key=groq_key,
-            base_url=GROQ_BASE_URL
+            base_url=GROQ_BASE_URL,
+            timeout=120.0
         )
         model = os.environ.get("LLM_MODEL", DEFAULT_GROQ_MODEL)
         return client, "Groq", model
@@ -376,7 +377,8 @@ def get_llm_client() -> Tuple[Optional[Any], str, str]:
     if openrouter_key:
         client = OpenAI(
             api_key=openrouter_key,
-            base_url=OPENROUTER_BASE_URL
+            base_url=OPENROUTER_BASE_URL,
+            timeout=120.0
         )
         model = os.environ.get("LLM_MODEL", DEFAULT_FREE_MODEL)
         return client, "OpenRouter", model
@@ -478,6 +480,34 @@ def call_llm_with_prompt(prompt: str, model: str = None) -> Optional[str]:
         elif "model" in error_msg.lower():
             print(f"  -> Model '{model}' may not be available. Try: --model google/gemma-2-9b-it:free")
         
+        # Fallback: direct REST call to Groq
+        if provider == "Groq":
+            try:
+                print("[LLM] Falling back to direct Groq HTTP call...")
+                headers = {
+                    "Authorization": f"Bearer {os.environ.get('GROQ_API_KEY','')}",
+                    "Content-Type": "application/json",
+                }
+                payload = {
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": "You are an expert n8n workflow architect. You create production-ready automation workflows. Always output valid JSON when asked."},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 8000,
+                }
+                resp = requests.post(f"{GROQ_BASE_URL}/chat/completions", headers=headers, json=payload, timeout=60)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    content = data["choices"][0]["message"]["content"]
+                    print(f"[LLM] Fallback response received ({len(content)} chars) OK")
+                    return content
+                else:
+                    print(f"[LLM] Fallback failed: HTTP {resp.status_code} - {resp.text}")
+            except Exception as inner:
+                print(f"[LLM] Fallback error: {inner}")
+
         # Fallback: direct REST call to OpenRouter to bypass client quirks
         if provider == "OpenRouter":
             try:
